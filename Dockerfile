@@ -80,4 +80,4 @@ USER appuser
 EXPOSE 5000
 
 # 使用 Gunicorn 作为生产环境的 WSGI 服务器
-CMD ["python", "cf_pass_api.py"]
+CMD ["python", "turnstile_pass_api.py"]
