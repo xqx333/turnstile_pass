@@ -1,4 +1,3 @@
-import threading
 from flask import Flask, request, jsonify
 import requests
 from DrissionPage import Chromium, ChromiumOptions
@@ -6,7 +5,6 @@ import time
 import os
 
 app = Flask(__name__)
-browser_lock = threading.Lock()
 
 def initialize_browser():
     co = ChromiumOptions()
@@ -15,6 +13,7 @@ def initialize_browser():
     # 从环境变量获取浏览器路径，默认值为常见路径
     browser_path = os.getenv('BROWSER_PATH', '/usr/bin/google-chrome')
     co.set_browser_path(browser_path)
+        # 默认的User-Agent，如果未提供
     co.set_user_agent(user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
                                      'AppleWebKit/537.36 (KHTML, like Gecko) '
                                      'Chrome/129.0.0.0 Safari/537.36 Edg/129.0.0.0')
@@ -24,18 +23,11 @@ def initialize_browser():
     co.set_argument('--window-size=800,600')
     co.incognito(on_off=True)
 
-    try:
-        browser = Chromium(addr_or_opts=co)
-        print("浏览器初始化成功。")
-        return browser
-    except Exception as e:
-        print(f"浏览器初始化失败: {e}")
-        raise
+    browser = Chromium(addr_or_opts=co)
+    tab = browser.latest_tab
+    return browser, tab
 
-browser = initialize_browser()
-
-def get_TurnstileToken(website, sitekey, max_retries=3):
-    global browser
+def get_TurnstileToken(website, sitekey, tab,max_retries=3):
     script_txt = f"""
             (function(){{
                 document.body.innerHTML='';
@@ -73,11 +65,7 @@ def get_TurnstileToken(website, sitekey, max_retries=3):
             """
     for attempt in range(1, max_retries + 1):
         try:
-            with browser_lock:
-                tab = browser.new_tab(website)
-        except Exception as e:
-            continue
-        try:
+            tab.get(website)
             tab.run_js_loaded(script_txt)
             # 获取并操作元素
             container_ele = tab.ele('@id:turnstile-test-container')
@@ -102,11 +90,6 @@ def get_TurnstileToken(website, sitekey, max_retries=3):
                 cookies = tab.cookies().as_dict()
                 if 'TurnstileToken' in cookies:
                     print(f"成功获取 'TurnstileToken'：{cookies['TurnstileToken']}")
-                    try:
-                        tab.close()
-                        print("页面关闭成功")
-                    except Exception as e:
-                        print(f"第{attempt}次尝试：页面关闭失败，发生异常 - {e}")
                     return cookies['TurnstileToken']
                 time.sleep(1)  # 等待1秒后重试
 
@@ -115,7 +98,7 @@ def get_TurnstileToken(website, sitekey, max_retries=3):
 
         except Exception as e:
             print(f"第{attempt}次尝试：发生异常 - {e}")
-        tab.close()
+
     # 达到最大重试次数后仍未成功
     return None
 
@@ -128,6 +111,7 @@ def fetch_TurnstileToken():
 
     website = data.get('website')
     sitekey = data.get('sitekey')
+    browser = None
 
     if not website:
         return jsonify({"error": "缺少 'website' 参数。"}), 400
@@ -135,7 +119,8 @@ def fetch_TurnstileToken():
     if not sitekey:
         return jsonify({"error": "缺少 'sitekey' 参数。"}), 400
     try:
-        TurnstileToken = get_TurnstileToken(website, sitekey)
+        browser, tab = initialize_browser()
+        TurnstileToken = get_TurnstileToken(website, sitekey,tab)
 
         if TurnstileToken:
             response = {
@@ -152,6 +137,9 @@ def fetch_TurnstileToken():
 
     except Exception as e:
         return jsonify({"error": f"发生未预期的错误: {e}"}), 500
+    finally:
+        if browser:
+            browser.quit()
 
 
 @app.route('/', methods=['GET'])
