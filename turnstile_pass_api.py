@@ -36,8 +36,6 @@ browser = initialize_browser()
 
 def get_TurnstileToken(website, sitekey, max_retries=3):
     global browser
-    with browser_lock:
-        tab = browser.new_tab(website)
     script_txt = f"""
             (function(){{
                 document.body.innerHTML='';
@@ -75,6 +73,11 @@ def get_TurnstileToken(website, sitekey, max_retries=3):
             """
     for attempt in range(1, max_retries + 1):
         try:
+            with browser_lock:
+                tab = browser.new_tab(website)
+        except Exception as e:
+            continue
+        try:
             tab.run_js_loaded(script_txt)
             # 获取并操作元素
             container_ele = tab.ele('@id:turnstile-test-container')
@@ -99,7 +102,11 @@ def get_TurnstileToken(website, sitekey, max_retries=3):
                 cookies = tab.cookies().as_dict()
                 if 'TurnstileToken' in cookies:
                     print(f"成功获取 'TurnstileToken'：{cookies['TurnstileToken']}")
-                    tab.close()
+                    try:
+                        tab.close()
+                        print("页面关闭成功")
+                    except Exception as e:
+                        print(f"第{attempt}次尝试：页面关闭失败，发生异常 - {e}")
                     return cookies['TurnstileToken']
                 time.sleep(1)  # 等待1秒后重试
 
@@ -108,10 +115,8 @@ def get_TurnstileToken(website, sitekey, max_retries=3):
 
         except Exception as e:
             print(f"第{attempt}次尝试：发生异常 - {e}")
-        tab.refresh()
-
+        tab.close()
     # 达到最大重试次数后仍未成功
-    tab.close()
     return None
 
 @app.route('/get_TurnstileToken', methods=['POST'])
