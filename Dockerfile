@@ -58,5 +58,5 @@ COPY . .
 # 暴露端口
 EXPOSE 5000
 
-# 使用 Gunicorn 作为生产环境的 WSGI 服务器
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--worker-class", "gevent", "turnstile_pass_api:app"]
+# 使用 Gunicorn 作为生产环境的 WSGI 服务器，并配置多工作进程和线程
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--threads", "4", "turnstile_pass_api:app"]
