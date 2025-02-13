@@ -5,13 +5,15 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     FLASK_APP=app.py \
     FLASK_RUN_HOST=0.0.0.0 \
     FLASK_RUN_PORT=5000
+    DISPLAY=:99 \
+    PIP_NO_CACHE_DIR=1
+# 安装系统依赖
 RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     gnupg \
     unzip \
     fonts-liberation \
     libappindicator3-1 \
-    libasound2 \
     libatk-bridge2.0-0 \
     libatk1.0-0 \
     libcups2 \
@@ -20,14 +22,31 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgbm1 \
     libgtk-3-0 \
     libnspr4 \
-    libnss3 \
     libx11-xcb1 \
     libxcomposite1 \
     libxdamage1 \
     libxrandr2 \
     xdg-utils \
     ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+    # 基础依赖
+    curl \
+    gnupg2 \
+    xvfb \
+    x11-utils \
+    # Chromium 依赖
+    libglib2.0-0 \
+    libnss3 \
+    libgconf-2-4 \
+    libfontconfig1 \
+    libxss1 \
+    libasound2 \
+    libdbus-glib-1-2 \
+    # 图像处理依赖
+    libgl1-mesa-glx \
+    libxi6 \
+    # 清理缓存
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get purge -y --auto-remove
 
 RUN wget -q "https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb" -O chrome.deb \
     && apt-get update \
