@@ -3,3 +3,7 @@ requests
 DrissionPage==4.1.0.8
 gunicorn
 gevent
+pyscreeze
+pyautogui
+opencv-python-headless
+PyVirtualDisplay
