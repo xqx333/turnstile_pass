@@ -4,7 +4,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     BROWSER_PATH=/usr/bin/google-chrome \
     FLASK_APP=app.py \
     FLASK_RUN_HOST=0.0.0.0 \
-    FLASK_RUN_PORT=5000
+    FLASK_RUN_PORT=5000 \
     PIP_NO_CACHE_DIR=1
 ENV DISPLAY=:99
 # 安装系统依赖
@@ -78,4 +78,4 @@ COPY . .
 EXPOSE 5000
 
 # 使用 Gunicorn 作为生产环境的 WSGI 服务器，并配置多工作进程和线程
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--threads", "1", "turnstile_pass_api:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "1", "--threads", "1", "turnstile_pass_api:app"]
