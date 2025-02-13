@@ -5,10 +5,15 @@ import time
 import os
 import random
 import pyautogui
+from pyvirtualdisplay import Display
 
 app = Flask(__name__)
+display = None
 
 def initialize_browser():
+    # 启动虚拟显示（可选，Dockerfile 已配置时可省略）
+    display = Display(visible=0, size=(1024, 768))
+    display.start()
     co = ChromiumOptions()
     co.auto_port()
 
@@ -18,6 +23,7 @@ def initialize_browser():
 
     co.set_argument('--no-sandbox')
     co.incognito(on_off=True)
+    co.set_argument('--window-size=800,600')
 
     browser = Chromium(addr_or_opts=co)
     tab = browser.latest_tab
@@ -150,6 +156,8 @@ def fetch_TurnstileToken():
     finally:
         if browser:
             browser.quit()
+        if display:
+            display.stop()
 
 
 @app.route('/', methods=['GET'])
