@@ -16,7 +16,6 @@ def initialize_browser():
     browser_path = os.getenv('BROWSER_PATH', '/usr/bin/google-chrome')
     co.set_browser_path(browser_path)
 
-    co.headless(True)
     co.set_argument('--no-sandbox')
     co.incognito(on_off=True)
 
