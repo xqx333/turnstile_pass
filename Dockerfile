@@ -5,8 +5,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     FLASK_APP=app.py \
     FLASK_RUN_HOST=0.0.0.0 \
     FLASK_RUN_PORT=5000
-    DISPLAY=:99 \
     PIP_NO_CACHE_DIR=1
+ENV DISPLAY=:99
 # 安装系统依赖
 RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
