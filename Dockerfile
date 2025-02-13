@@ -5,6 +5,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     FLASK_APP=app.py \
     FLASK_RUN_HOST=0.0.0.0 \
     FLASK_RUN_PORT=5000 \
+    XAUTHORITY=/tmp/.Xauthority \  
     PIP_NO_CACHE_DIR=1
 ENV DISPLAY=:99
 # 安装系统依赖
@@ -33,6 +34,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gnupg2 \
     xvfb \
     x11-utils \
+    xauth \  
     # Chromium 依赖
     libglib2.0-0 \
     libnss3 \
