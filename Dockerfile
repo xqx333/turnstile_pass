@@ -78,4 +78,7 @@ COPY . .
 EXPOSE 5000
 
 # 使用 Gunicorn 作为生产环境的 WSGI 服务器，并配置多工作进程和线程
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "1", "--threads", "1", "turnstile_pass_api_pyautogui:app"]
+# 启动脚本（包含 Xvfb 和 Flask）
+CMD Xvfb :99 -screen 0 1024x768x24 -ac +extension GLX +render -noreset & \
+    sleep 2 && \
+    ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "1", "--threads", "1", "turnstile_pass_api_pyautogui:app"]
