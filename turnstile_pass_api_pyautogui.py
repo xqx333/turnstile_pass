@@ -11,9 +11,6 @@ app = Flask(__name__)
 display = None
 
 def initialize_browser():
-    # 启动虚拟显示（可选，Dockerfile 已配置时可省略）
-    display = Display(visible=0, size=(1024, 768))
-    display.start()
     co = ChromiumOptions()
     co.auto_port()
 
@@ -156,8 +153,6 @@ def fetch_TurnstileToken():
     finally:
         if browser:
             browser.quit()
-        if display:
-            display.stop()
 
 
 @app.route('/', methods=['GET'])
