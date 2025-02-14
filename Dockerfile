@@ -1,86 +1,58 @@
-FROM python:3.10-slim AS base
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    BROWSER_PATH=/usr/bin/google-chrome \
-    FLASK_APP=app.py \
-    FLASK_RUN_HOST=0.0.0.0 \
-    FLASK_RUN_PORT=5000 \
-    XAUTHORITY=/tmp/.Xauthority \  
-    PIP_NO_CACHE_DIR=1
-ENV DISPLAY=:99
-# 安装系统依赖
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    wget \
-    gnupg \
-    unzip \
-    fonts-liberation \
-    libappindicator3-1 \
-    libatk-bridge2.0-0 \
-    libatk1.0-0 \
-    libcups2 \
-    libdbus-1-3 \
-    libdrm2 \
-    libgbm1 \
-    libgtk-3-0 \
-    libnspr4 \
-    libx11-xcb1 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxrandr2 \
-    xdg-utils \
-    ca-certificates \
-    # 基础依赖
-    curl \
-    gnupg2 \
-    xvfb \
-    x11-utils \
-    xauth \  
-    # Chromium 依赖
-    libglib2.0-0 \
-    libnss3 \
-    libgconf-2-4 \
-    libfontconfig1 \
-    libxss1 \
-    libasound2 \
-    libdbus-glib-1-2 \
-    # 图像处理依赖
-    libgl1-mesa-glx \
-    libxi6 \
-    # 清理缓存
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get purge -y --auto-remove
+# Use the official Ubuntu image as the base image
+FROM --platform=linux/amd64 ubuntu:22.04
 
-RUN wget -q "https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb" -O chrome.deb \
-    && apt-get update \
-    && apt-get install -y ./chrome.deb --no-install-recommends \
-    && rm chrome.deb \
-    && rm -rf /var/lib/apt/lists/*
+# Set environment variables to avoid interactive prompts during build
+ENV DEBIAN_FRONTEND=noninteractive
+ENV DOCKERMODE=true
 
-FROM base AS builder
+# Install necessary packages for Xvfb and pyvirtualdisplay
+RUN apt-get update && \
+    apt-get install -y \
+        python3 \
+        python3-pip \
+        wget \
+        gnupg \
+        ca-certificates \
+        libx11-xcb1 \
+        libxcomposite1 \
+        libxdamage1 \
+        libxrandr2 \
+        libxss1 \
+        libxtst6 \
+        libnss3 \
+        libatk-bridge2.0-0 \
+        libgtk-3-0 \
+        x11-apps \
+        fonts-liberation \
+        libappindicator3-1 \
+        libu2f-udev \
+        libvulkan1 \
+        libdrm2 \
+        xdg-utils \
+        xvfb \
+        && rm -rf /var/lib/apt/lists/*
 
+# Add Google Chrome repository and install Google Chrome
+RUN wget -q -O /usr/share/keyrings/google-chrome.gpg https://dl.google.com/linux/linux_signing_key.pub && \
+    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list && \
+    apt-get update --allow-insecure-repositories && \
+    apt-get install -y --allow-unauthenticated google-chrome-stable
+
+# Install Python dependencies including pyvirtualdisplay
+RUN pip3 install --upgrade pip
+RUN pip3 install pyvirtualdisplay
+
+# Set up a working directory
 WORKDIR /app
 
-COPY requirements.txt .
-
-RUN pip install --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
-
-FROM base AS production
-
-
-WORKDIR /app
-
-COPY --from=builder /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
-COPY --from=builder /usr/local/bin /usr/local/bin
-
+# Copy application files
 COPY . .
 
+# Install Python dependencies
+RUN pip3 install -r requirements.txt
 
 # 暴露端口
 EXPOSE 5000
 
 # 使用 Gunicorn 作为生产环境的 WSGI 服务器，并配置多工作进程和线程
-# 启动脚本（包含 Xvfb 和 Flask）
-CMD sh -c "Xvfb :99 -screen 0 1024x768x24 -ac +extension GLX +render -noreset & \
-    sleep 2 && \
-    gunicorn --bind 0.0.0.0:5000 --workers 1 --threads 1 turnstile_pass_api_pyautogui:app"
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--threads", "1", "turnstile_pass_api:app"]
