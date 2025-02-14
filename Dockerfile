@@ -55,4 +55,4 @@ RUN pip3 install -r requirements.txt
 EXPOSE 5000
 
 # 使用 Gunicorn 作为生产环境的 WSGI 服务器，并配置多工作进程和线程
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--threads", "1", "turnstile_pass_api:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--threads", "1", "turnstile_pass_api_pyautogui:app"]
