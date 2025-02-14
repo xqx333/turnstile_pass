@@ -8,6 +8,8 @@ import pyautogui
 from pyvirtualdisplay import Display
 import atexit
 
+DOCKER_MODE = os.getenv('DOCKER_MODE', 'false').lower() == 'true'
+
 app = Flask(__name__)
     
 def initialize_browser():
@@ -180,7 +182,7 @@ def test():
 if __name__ == '__main__':
     display = None
     if DOCKER_MODE:
-        display = Display(visible=0, size=(1920, 1080))
+        display = Display(":99", visible=0, size=(1920, 1080))
         display.start()
         def cleanup_display():
             if display:
