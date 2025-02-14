@@ -6,11 +6,15 @@ import os
 import random
 import pyautogui
 from pyvirtualdisplay import Display
+import atexit
 
 app = Flask(__name__)
 display = None
 
 def initialize_browser():
+    if display is None:
+        display = Display(visible=0, size=(1920, 1080))
+        display.start()
     co = ChromiumOptions()
     co.auto_port()
 
@@ -153,6 +157,9 @@ def fetch_TurnstileToken():
     finally:
         if browser:
             browser.quit()
+        if display:
+            display.stop()
+            display = None
 
 
 @app.route('/', methods=['GET'])
