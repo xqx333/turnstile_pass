@@ -3,7 +3,6 @@ FROM --platform=linux/amd64 ubuntu:22.04
 
 # Set environment variables to avoid interactive prompts during build
 ENV DEBIAN_FRONTEND=noninteractive
-ENV DOCKER_MODE=true
 ENV DISPLAY=:99
 
 # Install necessary packages for Xvfb and pyvirtualdisplay
@@ -56,4 +55,4 @@ RUN pip3 install -r requirements.txt
 EXPOSE 5000
 
 # 使用 Gunicorn 作为生产环境的 WSGI 服务器，并配置多工作进程和线程
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "1", "--threads", "1", "turnstile_pass_api_pyautogui:app"]
+CMD Xvfb :99 -screen 0 1920x1080x24 & exec gunicorn --bind 0.0.0.0:5000 --workers=1 --threads=1 turnstile_pass_api_pyautogui:app
