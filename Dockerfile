@@ -3,7 +3,8 @@ FROM --platform=linux/amd64 ubuntu:22.04
 
 # Set environment variables to avoid interactive prompts during build
 ENV DEBIAN_FRONTEND=noninteractive
-ENV DOCKERMODE=true
+ENV DOCKER_MODE=true
+ENV DISPLAY=:99
 
 # Install necessary packages for Xvfb and pyvirtualdisplay
 RUN apt-get update && \
