@@ -11,10 +11,16 @@ import atexit
 app = Flask(__name__)
 display = None
 
+    
+if DOCKER_MODE:
+    display = Display(visible=0, size=(1920, 1080))
+    display.start()
+    def cleanup_display():
+        if display:
+            display.stop()
+    atexit.register(cleanup_display)
+    
 def initialize_browser():
-    if display is None:
-        display = Display(visible=0, size=(1920, 1080))
-        display.start()
     co = ChromiumOptions()
     co.auto_port()
 
@@ -157,9 +163,6 @@ def fetch_TurnstileToken():
     finally:
         if browser:
             browser.quit()
-        if display:
-            display.stop()
-            display = None
 
 
 @app.route('/', methods=['GET'])
