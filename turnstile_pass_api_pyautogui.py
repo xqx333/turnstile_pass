@@ -5,7 +5,6 @@ import time
 import os
 import random
 import pyautogui
-from pyvirtualdisplay import Display
 import atexit
 
 DOCKER_MODE = os.getenv('DOCKER_MODE', 'false').lower() == 'true'
@@ -180,12 +179,4 @@ def test():
 
 
 if __name__ == '__main__':
-    display = None
-    if DOCKER_MODE:
-        display = Display(":99", visible=0, size=(1920, 1080))
-        display.start()
-        def cleanup_display():
-            if display:
-                display.stop()
-        atexit.register(cleanup_display)
     app.run(host='0.0.0.0', port=5000)
