@@ -179,4 +179,11 @@ def test():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    if DOCKER_MODE:
+        display = Display(visible=0, size=(1920, 1080))
+        display.start()
+        def cleanup_display():
+            if display:
+                display.stop()
+        atexit.register(cleanup_display)
+    uvicorn.run(app, host="0.0.0.0", port=5000)
