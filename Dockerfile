@@ -42,6 +42,9 @@ RUN wget -q -O /usr/share/keyrings/google-chrome.gpg https://dl.google.com/linux
 RUN pip3 install --upgrade pip
 RUN pip3 install pyvirtualdisplay
 
+# Create ~/.Xauthority file
+RUN mkdir -p /root && touch /root/.Xauthority
+
 # Set up a working directory
 WORKDIR /app
 
@@ -55,4 +58,4 @@ RUN pip3 install -r requirements.txt
 EXPOSE 5000
 
 # 使用 Gunicorn 作为生产环境的 WSGI 服务器，并配置多工作进程和线程
-CMD Xvfb :99 -screen 0 1920x1080x24 & exec gunicorn --bind 0.0.0.0:5000 --workers=1 --threads=1 turnstile_pass_api_pyautogui:app
+CMD Xvfb :99 -screen 0 1920x1080x24 -nolisten tcp & exec gunicorn --bind 0.0.0.0:5000 --workers=1 --threads=1 turnstile_pass_api_pyautogui:app
