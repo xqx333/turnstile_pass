@@ -9,16 +9,6 @@ from pyvirtualdisplay import Display
 import atexit
 
 app = Flask(__name__)
-display = None
-
-    
-if DOCKER_MODE:
-    display = Display(visible=0, size=(1920, 1080))
-    display.start()
-    def cleanup_display():
-        if display:
-            display.stop()
-    atexit.register(cleanup_display)
     
 def initialize_browser():
     co = ChromiumOptions()
@@ -188,4 +178,12 @@ def test():
 
 
 if __name__ == '__main__':
+    display = None
+    if DOCKER_MODE:
+        display = Display(visible=0, size=(1920, 1080))
+        display.start()
+        def cleanup_display():
+            if display:
+                display.stop()
+        atexit.register(cleanup_display)
     app.run(host='0.0.0.0', port=5000)
