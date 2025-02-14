@@ -6,6 +6,7 @@ import os
 import random
 import pyautogui
 import atexit
+import uvicorn
 
 DOCKER_MODE = os.getenv('DOCKER_MODE', 'false').lower() == 'true'
 
