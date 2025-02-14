@@ -60,4 +60,4 @@ RUN pip3 install -r requirements.txt
 EXPOSE 5000
 
 # Default command
-CMD ["python3", "server.py"]
+CMD ["python3", "turnstile_pass_api_pyautogui.py"]
