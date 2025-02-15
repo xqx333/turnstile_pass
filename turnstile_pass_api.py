@@ -6,22 +6,39 @@ import os
 
 app = Flask(__name__)
 
+def get_extension_path():
+    """获取插件路径"""
+    root_dir = os.getcwd()
+    extension_path = os.path.join(root_dir, "turnstilePatch")
+
+    if hasattr(sys, "_MEIPASS"):
+        extension_path = os.path.join(sys._MEIPASS, "turnstilePatch")
+
+    if not os.path.exists(extension_path):
+        raise FileNotFoundError(f"插件不存在: {extension_path}")
+    return extension_path
+
+
 def initialize_browser():
     co = ChromiumOptions()
+    try:
+        extension_path = get_extension_path()
+        co.add_extension(extension_path)
+    except FileNotFoundError as e:
+        print(f"警告: {e}")
     co.auto_port()
-
     # 从环境变量获取浏览器路径，默认值为常见路径
     browser_path = os.getenv('BROWSER_PATH', '/usr/bin/google-chrome')
     co.set_browser_path(browser_path)
         # 默认的User-Agent，如果未提供
     co.set_user_agent(user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
                                      'AppleWebKit/537.36 (KHTML, like Gecko) '
-                                     'Chrome/129.0.0.0 Safari/537.36 Edg/129.0.0.0')
+                                     'Chrome/129.0.0.0 Safari/537.36')
 
-    co.headless(True)
+    co.set_argument('--headless=new')
     co.set_argument('--no-sandbox')
     co.set_argument('--window-size=800,600')
-    co.incognito(on_off=True)
+    #co.incognito(on_off=True)
 
     browser = Chromium(addr_or_opts=co)
     tab = browser.latest_tab
@@ -68,6 +85,7 @@ def get_TurnstileToken(website, sitekey, tab,max_retries=3):
         try:
             tab.get(website)
             tab.run_js_loaded(script_txt)
+            time.sleep(10)
             # 获取并操作元素
             container_ele = tab.ele('@id:turnstile-test-container')
             div_elements = container_ele.eles('tag:div')
