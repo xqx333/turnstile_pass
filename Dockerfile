@@ -29,7 +29,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-RUN wget -q "https://repo.debiancn.org/pool/main/g/google-chrome-stable/google-chrome-stable_132.0.6834.110-1_amd64.deb" -O chrome.deb \
+RUN wget -q "https://repo.debiancn.org/pool/main/g/google-chrome-stable/google-chrome-stable_138.0.7204.92-1_amd64.deb" -O chrome.deb \
     && apt-get update \
     && apt-get install -y ./chrome.deb --no-install-recommends \
     && rm chrome.deb \
