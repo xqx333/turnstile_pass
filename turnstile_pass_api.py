@@ -34,7 +34,7 @@ def initialize_browser():
         # 默认的User-Agent，如果未提供
     co.set_user_agent(user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
                                      'AppleWebKit/537.36 (KHTML, like Gecko) '
-                                     'Chrome/136.0.0.0 Safari/537.36')
+                                     'Chrome/143.0.0.0 Safari/537.36')
 
     co.set_argument('--headless=new')
     co.set_argument('--no-sandbox')
@@ -186,3 +186,4 @@ def test():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
+
