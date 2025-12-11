@@ -1,5 +1,6 @@
 Flask
 requests
-DrissionPage==4.1.0.8
+DrissionPage
 gunicorn
+
 gevent
